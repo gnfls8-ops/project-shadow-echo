@@ -28,7 +28,8 @@
     <script>
       var frame = document.querySelector("#echo-frame");
       var canvas = document.querySelector("#unity-canvas");
-      var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints || 0) > 1;
+      // phones and tablets only (a touch-screen laptop is still a PC: 16:9 frame, keyboard layout)
+      var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && (navigator.maxTouchPoints || 0) > 1);
 
       // Keep a 16:9 play area inside any window (letterbox / pillarbox). Phones play in landscape.
       // Desktop: a 16:9 play area (letterbox). Phones and foldables: the whole screen, any aspect —
