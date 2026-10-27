@@ -54,7 +54,7 @@
       var buildUrl = "Build";
       // GitHub Pages caches files for 10 minutes: a per-build query makes a reload fetch this build's files,
       // never an older build's (QA Q-13: a stale data file ignored ?lab=1)
-      var bust = "?v=" + encodeURIComponent("blade+e075679");
+      var bust = "?v=" + encodeURIComponent("blade+3004568");
       var config = {
         arguments: [],
         dataUrl: buildUrl + "/WebGL.data.unityweb" + bust,
@@ -63,7 +63,7 @@
         streamingAssetsUrl: "StreamingAssets",
         companyName: "ShadowProto",
         productName: "Project Shadow",
-        productVersion: "blade+e075679",
+        productVersion: "blade+3004568",
         // Native resolution on phones (up to 3x): the scene is light enough for current phones.
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 3 : 2),
         showBanner: function (msg, type) {
