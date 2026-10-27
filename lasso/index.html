@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0b0c10">
+    <title>Project Shadow</title>
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000;
+                   touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+                   overscroll-behavior: none; -webkit-tap-highlight-color: transparent; }
+      #echo-frame { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #0b0c10; }
+      #unity-canvas { width: 100%; height: 100%; display: block; outline: none; background: #0b0c10; touch-action: none; }
+      #echo-loading { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center;
+                      color: #7fe9df; font: 600 13px/1.6 Consolas, Menlo, monospace; letter-spacing: 4px; pointer-events: none; }
+      #echo-bar { width: 260px; max-width: 70vw; height: 2px; margin: 10px auto 0; background: #16302e; }
+      #echo-fill { width: 0; height: 100%; background: #2ee6d6; }
+      #echo-error { color: #ff6b5e; letter-spacing: 1px; margin-top: 12px; font-weight: 400; padding: 0 16px; }
+    </style>
+  </head>
+  <body>
+    <div id="echo-frame">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="echo-loading">LASSO<div id="echo-bar"><div id="echo-fill"></div></div><div id="echo-error"></div></div>
+    </div>
+    <script>
+      var frame = document.querySelector("#echo-frame");
+      var canvas = document.querySelector("#unity-canvas");
+      // phones and tablets only (a touch-screen laptop is still a PC: 16:9 frame, keyboard layout)
+      var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && (navigator.maxTouchPoints || 0) > 1);
+
+      // Keep a 16:9 play area inside any window (letterbox / pillarbox). Phones play in landscape.
+      // Desktop: a 16:9 play area (letterbox). Phones and foldables: the whole screen, any aspect —
+      // the game re-frames the room and its touch buttons for wide (21:9) and near-square (unfolded) screens.
+      function fitFrame() {
+        var w = window.innerWidth, h = window.innerHeight, aspect = 16 / 9;
+        var fw = w, fh = w / aspect;
+        if (fh > h) { fh = h; fw = h * aspect; }
+        if (mobile) { fw = w; fh = h; }
+        frame.style.width = Math.floor(fw) + "px";
+        frame.style.height = Math.floor(fh) + "px";
+      }
+      window.addEventListener("resize", fitFrame);
+      window.addEventListener("orientationchange", function () { setTimeout(fitFrame, 250); });
+      fitFrame();
+
+      // No browser gestures over the game: context menu (RMB = dash), pinch zoom, double-tap zoom, pull-to-refresh.
+      ["contextmenu", "gesturestart", "dblclick"].forEach(function (t) { document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false }); });
+      document.addEventListener("touchmove", function (e) { e.preventDefault(); }, { passive: false });
+      canvas.addEventListener("mousedown", function () { canvas.focus(); });
+
+      var buildUrl = "Build";
+      // GitHub Pages caches files for 10 minutes: a per-build query makes a reload fetch this build's files,
+      // never an older build's (QA Q-13: a stale data file ignored ?lab=1)
+      var bust = "?v=" + encodeURIComponent("lasso+228e825");
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data.unityweb" + bust,
+        frameworkUrl: buildUrl + "/WebGL.framework.js.unityweb" + bust,
+        codeUrl: buildUrl + "/WebGL.wasm.unityweb" + bust,
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "ShadowProto",
+        productName: "Project Shadow",
+        productVersion: "lasso+228e825",
+        // Native resolution on phones (up to 3x): the scene is light enough for current phones.
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 3 : 2),
+        showBanner: function (msg, type) {
+          if (type === "error") document.querySelector("#echo-error").textContent = msg;
+          console.log("[unity " + type + "] " + msg);
+        }
+      };
+
+      var script = document.createElement("script");
+      script.src = buildUrl + "/WebGL.loader.js" + bust;
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          document.querySelector("#echo-fill").style.width = (100 * progress) + "%";
+        }).then(function (unityInstance) {
+          document.querySelector("#echo-loading").style.display = "none";
+          window.unityInstance = unityInstance;
+          canvas.focus();
+        }).catch(function (message) {
+          document.querySelector("#echo-error").textContent = message;
+        });
+      };
+      script.onerror = function () { document.querySelector("#echo-error").textContent = "Could not load the game files."; };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
