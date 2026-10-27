@@ -52,15 +52,18 @@
       canvas.addEventListener("mousedown", function () { canvas.focus(); });
 
       var buildUrl = "Build";
+      // GitHub Pages caches files for 10 minutes: a per-build query makes a reload fetch this build's files,
+      // never an older build's (QA Q-13: a stale data file ignored ?lab=1)
+      var bust = "?v=" + encodeURIComponent("0.1.0+fe55b3d");
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/EchoWebGL.data.unityweb",
-        frameworkUrl: buildUrl + "/EchoWebGL.framework.js.unityweb",
-        codeUrl: buildUrl + "/EchoWebGL.wasm.unityweb",
+        dataUrl: buildUrl + "/EchoWebGL.data.unityweb" + bust,
+        frameworkUrl: buildUrl + "/EchoWebGL.framework.js.unityweb" + bust,
+        codeUrl: buildUrl + "/EchoWebGL.wasm.unityweb" + bust,
         streamingAssetsUrl: "StreamingAssets",
         companyName: "ShadowProto",
         productName: "Project Shadow — Echo",
-        productVersion: "0.1.0+4b2eb26",
+        productVersion: "0.1.0+fe55b3d",
         // Native resolution on phones (up to 3x): the scene is light enough for current phones.
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 3 : 2),
         showBanner: function (msg, type) {
@@ -70,7 +73,7 @@
       };
 
       var script = document.createElement("script");
-      script.src = buildUrl + "/EchoWebGL.loader.js";
+      script.src = buildUrl + "/EchoWebGL.loader.js" + bust;
       script.onload = function () {
         createUnityInstance(canvas, config, function (progress) {
           document.querySelector("#echo-fill").style.width = (100 * progress) + "%";
