@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Project Shadow</title>
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
+      #shadow-frame { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: #0b0c10; }
+      #unity-canvas { width: 100%; height: 100%; display: block; outline: none; background: #0b0c10; cursor: crosshair; }
+      #shadow-loading { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center;
+                        color: #7fe9df; font: 600 13px/1.6 Consolas, Menlo, monospace; letter-spacing: 4px; pointer-events: none; }
+      #shadow-bar { width: 260px; height: 2px; margin: 10px auto 0; background: #16302e; }
+      #shadow-fill { width: 0; height: 100%; background: #2ee6d6; }
+      #shadow-error { color: #ff6b5e; letter-spacing: 1px; margin-top: 12px; font-weight: 400; }
+    </style>
+  </head>
+  <body>
+    <div id="shadow-frame">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="shadow-loading">PROJECT SHADOW<div id="shadow-bar"><div id="shadow-fill"></div></div><div id="shadow-error"></div></div>
+    </div>
+    <script>
+      var frame = document.querySelector("#shadow-frame");
+      var canvas = document.querySelector("#unity-canvas");
+
+      // Keep a 16:9 play area inside any window size (letterbox / pillarbox).
+      function fitFrame() {
+        var w = window.innerWidth, h = window.innerHeight, aspect = 16 / 9;
+        var fw = w, fh = w / aspect;
+        if (fh > h) { fh = h; fw = h * aspect; }
+        frame.style.width = Math.floor(fw) + "px";
+        frame.style.height = Math.floor(fh) + "px";
+      }
+      window.addEventListener("resize", fitFrame);
+      fitFrame();
+
+      // Right mouse button is Dash: never open the browser context menu over the game.
+      canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+      frame.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+      canvas.addEventListener("mousedown", function () { canvas.focus(); });
+
+      var buildUrl = "Build";
+      // per-build query: a reload never mixes in a cached older build (GitHub Pages caches for 10 minutes)
+      var bust = "?v=" + encodeURIComponent("combat+ce78483");
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/WebGL.data.unityweb" + bust,
+        frameworkUrl: buildUrl + "/WebGL.framework.js.unityweb" + bust,
+        codeUrl: buildUrl + "/WebGL.wasm.unityweb" + bust,
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "ShadowProto",
+        productName: "Project Shadow",
+        productVersion: "combat+ce78483",
+        // Cap the backbuffer on high-DPI screens so 4K monitors don't render 4K.
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+        showBanner: function (msg, type) {
+          if (type === "error") document.querySelector("#shadow-error").textContent = msg;
+          console.log("[unity " + type + "] " + msg);
+        }
+      };
+
+      var script = document.createElement("script");
+      script.src = buildUrl + "/WebGL.loader.js" + bust;
+      script.onload = function () {
+        createUnityInstance(canvas, config, function (progress) {
+          document.querySelector("#shadow-fill").style.width = (100 * progress) + "%";
+        }).then(function (unityInstance) {
+          document.querySelector("#shadow-loading").style.display = "none";
+          window.unityInstance = unityInstance;
+          canvas.focus();
+        }).catch(function (message) {
+          document.querySelector("#shadow-error").textContent = message;
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
