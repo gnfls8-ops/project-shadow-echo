@@ -23,7 +23,7 @@
   <body>
     <div id="echo-frame">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
-      <div id="echo-loading">LASSO<div id="echo-bar"><div id="echo-fill"></div></div><div id="echo-error"></div></div>
+      <div id="echo-loading">FUSION LASSO<div id="echo-bar"><div id="echo-fill"></div></div><div id="echo-error"></div></div>
     </div>
     <script>
       var frame = document.querySelector("#echo-frame");
@@ -54,7 +54,7 @@
       var buildUrl = "Build";
       // GitHub Pages caches files for 10 minutes: a per-build query makes a reload fetch this build's files,
       // never an older build's (QA Q-13: a stale data file ignored ?lab=1)
-      var bust = "?v=" + encodeURIComponent("lasso+882d841");
+      var bust = "?v=" + encodeURIComponent("lasso+60d859f");
       var config = {
         arguments: [],
         dataUrl: buildUrl + "/WebGL.data.unityweb" + bust,
@@ -63,7 +63,7 @@
         streamingAssetsUrl: "StreamingAssets",
         companyName: "ShadowProto",
         productName: "Project Shadow",
-        productVersion: "lasso+882d841",
+        productVersion: "lasso+60d859f",
         // Native resolution on phones (up to 3x): the scene is light enough for current phones.
         devicePixelRatio: Math.min(window.devicePixelRatio || 1, mobile ? 3 : 2),
         showBanner: function (msg, type) {
